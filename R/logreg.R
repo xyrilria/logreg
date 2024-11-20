@@ -9,6 +9,7 @@
 #' @param mode (optional) What type of regression you want to do (the only currently supported type is "binomial")
 #' @param splits The number of categories you want your explanatory variable split up into (higher values are more accurate but may not work, I recommend 10)
 #' @param partition (optional) Set to TRUE to cut your dataset down to a managable size for modelling, set to FALSE to bypass this. If you bypass this, it may crash R.
+#' @param restrict_NA Disable the automatic removal of incredibly low correlation variables. Set to true if you keep getting errors that predictive_model_A doesn't exist.
 #' @param endpoint What you want as the output of this command. Options: "check" (check data compatability), format (format response variable), split (split explanatory variables), numbers (view the regression model as text), or model (create a regression model and ggplot2 visualization)
 #' @export
 logreg <- function(data, targets, response, binomial_target, binomial_alternate = NULL, mode = "binomial", splits, partition = NULL, endpoint = NULL){
