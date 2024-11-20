@@ -12,7 +12,7 @@
 #' @param restrict_NA Disable the automatic removal of incredibly low correlation variables. Set to true if you keep getting errors that predictive_model_A doesn't exist.
 #' @param endpoint What you want as the output of this command. Options: "check" (check data compatability), format (format response variable), split (split explanatory variables), numbers (view the regression model as text), or model (create a regression model and ggplot2 visualization)
 #' @export
-logreg <- function(data, targets, response, binomial_target, binomial_alternate = NULL, mode = "binomial", splits, partition = NULL, endpoint = NULL){
+logreg <- function(data, targets, response, binomial_target, binomial_alternate = NULL, mode = "binomial", splits, partition = NULL, restrict_NA = FALSE, endpoint = NULL){
 
   #check if endpoint is at a valid level
   if(endpoint != "check" & endpoint != "format" & endpoint != "split" & endpoint != "model" & endpoint != "numbers"){
@@ -108,39 +108,67 @@ logreg <- function(data, targets, response, binomial_target, binomial_alternate 
 
       seq_range <- seq(min(df_model$estimate, na.rm = TRUE), max(df_model$estimate, na.rm = TRUE), length.out = splits)
 
-      #mutate reg_res, higher L means better predictor
-      df_testA <- df_model %>%
-        reframe(
-          term = term,
-          prob_cat = cut(
-            if_else(
-              abs(estimate) >= 0.1 & abs(estimate) >= std.error,
+      if(restrict_NA == TRUE){
+        #mutate reg_res, higher L means better predictor
+        df_testA <- df_model %>%
+          reframe(
+            term = term,
+            prob_cat = cut(
               estimate,
-              NA_real_
-            ),
-            breaks = quantiles,
-            labels = paste0("L", 1:(length(quantiles) - 1)),
-            include.lowest = TRUE,
-            right = TRUE
+              breaks = quantiles,
+              labels = paste0("L", 1:(length(quantiles) - 1)),
+              include.lowest = TRUE,
+              right = TRUE
+            )
           )
-        )
 
-      #second grouping mechanism, compare the 2 later
-      df_testB <- df_model %>%
-        reframe(
-          term = term,
-          prob_cat = cut(
-            if_else(
-              abs(estimate) >= 0.1 & abs(estimate) >= std.error,
+        #second grouping mechanism, compare the 2 later
+        df_testB <- df_model %>%
+          reframe(
+            term = term,
+            prob_cat = cut(
               estimate,
-              NA_real_
-            ),
-            breaks = seq_range,
-            labels = paste0("L", 1:(length(quantiles) - 1)),
-            include.lowest = TRUE,
-            right = TRUE
+              breaks = seq_range,
+              labels = paste0("L", 1:(length(quantiles) - 1)),
+              include.lowest = TRUE,
+              right = TRUE
+            )
           )
-        )
+      } else{
+        #mutate reg_res, higher L means better predictor
+        df_testA <- df_model %>%
+          reframe(
+            term = term,
+            prob_cat = cut(
+              if_else(
+                abs(estimate) >= 0.1 & abs(estimate) >= std.error,
+                estimate,
+                NA_real_
+              ),
+              breaks = quantiles,
+              labels = paste0("L", 1:(length(quantiles) - 1)),
+              include.lowest = TRUE,
+              right = TRUE
+            )
+          )
+
+        #second grouping mechanism, compare the 2 later
+        df_testB <- df_model %>%
+          reframe(
+            term = term,
+            prob_cat = cut(
+              if_else(
+                abs(estimate) >= 0.1 & abs(estimate) >= std.error,
+                estimate,
+                NA_real_
+              ),
+              breaks = seq_range,
+              labels = paste0("L", 1:(length(quantiles) - 1)),
+              include.lowest = TRUE,
+              right = TRUE
+            )
+          )
+      }
 
       #note: later, set up an actual setting to determine which things get cut out. maybe named threshold?
 
