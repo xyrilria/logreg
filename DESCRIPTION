@@ -1,0 +1,15 @@
+Package: logreg
+Title: logistic regression made simple!
+Version: 0.1.0
+Author: xyrilria
+Maintainer: xyrilria <xyrilria@gmail.com>
+Description: This package allows you to format, analyze, and graph data using logistic regression in one step. It currently only supports binomial regression, but will support multinomial regression eventually. I'm also working on testing the model against testing data rather than the training data the command automatically creates.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends:
+  tidyverse,
+  dplyr,
+  tidymodels,
+  caret
